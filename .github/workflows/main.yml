@@ -1,0 +1,69 @@
+name: Minimachine
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches-ignore:
+      - "*-min"
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout source branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install esbuild
+        run: npm install -g esbuild
+
+      - name: create dist folder
+        run: |
+          rm -rf dist
+          mkdir -p dist
+
+      - name: minify JS
+        run: |
+          while IFS= read -r file; do
+            echo "minifying JS: $file"
+            out="dist/${file#./}"
+            out="${out%.js}.min.js"
+            mkdir -p "$(dirname "$out")"
+            esbuild "$file" --minify --outfile="$out"
+          done < <(find . -type f -name "*.js" ! -name "*.min.js" ! -path "./dist/*")
+
+      - name: minify CSS
+        run: |
+          while IFS= read -r file; do
+            echo "minifying CSS: $file"
+            out="dist/${file#./}"
+            out="${out%.css}.min.css"
+            mkdir -p "$(dirname "$out")"
+            esbuild "$file" --minify --outfile="$out"
+          done < <(find . -type f -name "*.css" ! -name "*.min.css" ! -path "./dist/*")
+
+      - name: dist contents
+        run: |
+          echo "dist folder:"
+          find dist -type f
+
+      - name: push to -min
+        run: |
+          cd dist
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "minified build for ${{ github.ref_name }}"
+          git branch -M main
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push -f origin main:${{ github.ref_name }}-min
