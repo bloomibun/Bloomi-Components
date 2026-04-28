@@ -1,0 +1,46 @@
+* {
+    padding: 0;
+    margin: 0;
+    line-height: 1.6;
+}
+
+:root[data-bloomi-format="1"] {
+    --primary-color: white;
+
+    --button-text-color: white;
+    --button-color: rgb(139, 131, 255);
+}
+
+html[data-bloomi-theme="dark"][data-bloomi-format="1"]
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main[data-bloomi-main] {
+    flex: 1;
+}
+
+button[data-bloomi-button-1] {
+    background-color: var(--button-color);
+    color: var(--button-text-color);
+
+    border: none;
+    padding: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 3px;
+    transition: background-color 250ms ease, transform 250ms ease;
+}
+
+button[data-bloomi-button-1]:hover:not(:active) {
+    background-color: color-mix(in srgb, var(--button-color) 80%, rgb(0,0,0) 20%);
+    transform: scale(1.05);
+}
+
+button[data-bloomi-button-1]:active {
+    background-color: color-mix(in srgb, var(--button-color) 80%, rgb(255,255,255) 20%);
+    transform: scale(0.95);
+}
